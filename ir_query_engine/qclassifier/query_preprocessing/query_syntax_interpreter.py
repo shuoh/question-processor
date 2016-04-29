@@ -3,6 +3,7 @@ import itertools
 import time
 from ir_query_engine.qclassifier.utils.tree_traverser import TreebankNodeVisitor, dfs_traverse_tree
 from ir_query_engine.qclassifier.utils.sentence_parser import PARSER
+from ir_query_engine.qclassifier.templates.question_templates import tokenize_templated_string
 
 
 class QuerySyntaxInterpreter(object):
@@ -18,6 +19,8 @@ class QuerySyntaxInterpreter(object):
         :return: list(QuerySyntaxInterpretation)
         """
 
+        self._debug_print('Generating possible interpretations of the query...')
+
         # start timer
         start_time = time.clock()
 
@@ -28,7 +31,6 @@ class QuerySyntaxInterpreter(object):
         self._debug_print('Normalized form: ' + normalized_sentence)
 
         if self._debug:
-            print 'Question treebank structure:'
             parsed_tree.pretty_print()
 
         self._debug_print('All possible interpretations:')
@@ -37,8 +39,8 @@ class QuerySyntaxInterpreter(object):
         dfs_traverse_tree(parsed_tree, collector)
         interpretations = collector.get_collected_interpretations_for_subtree(parsed_tree)
         for interp in interpretations:
-            interp.interpreted_query = interp.apply_to(normalized_sentence)
-            self._debug_print(interp.interpreted_query)
+            interp.apply_to(normalized_sentence)
+            self._debug_print('- ' + interp.interpreted_query)
 
         # calculate time spent
         if metrics is not None:
@@ -53,21 +55,35 @@ class QuerySyntaxInterpreter(object):
 
 
 class QuerySyntaxInterpretation(object):
+    """
+    Attributes:
+        phrase_struct_replacements: all the phrase structure replacements that this interpretation is based upon
+        interpreted_query: only available after apply_to is called
+        interpreted_query_tokens: only available after apply_to is called
+    """
 
     def __init__(self, phrase_struct_replacements):
         """
         :param phrase_struct_replacements: list(PhraseStructureReplacement)
         """
         self.phrase_struct_replacements = phrase_struct_replacements
+        self.interpreted_query = None
+        self.interpreted_query_tokens = None
 
     def __repr__(self):
         return str(self.phrase_struct_replacements)
 
     def apply_to(self, normalized_sentence):
-        output = normalized_sentence
+        """
+        Note that this method will set the interpreted_query and interpreted_query_tokens attributes
+        :param normalized_sentence: the query input in normalized form
+        """
+        replaced = normalized_sentence
         for replacement in self.phrase_struct_replacements:
-            output = replacement.apply_to(output)
-        return output
+            replaced = replacement.apply_to(replaced)
+
+        self.interpreted_query = replaced
+        self.interpreted_query_tokens = tokenize_templated_string(replaced)
 
     @staticmethod
     def product(interp_list0, interp_list1):
@@ -89,7 +105,7 @@ class PhraseStructureReplacement(object):
     Attributes:
         text: the phrase text that appears in the original query
         phrase_label: the replacement label for the given phrase text
-        subtree_to_replacee: the treebank node for the given phrase text
+        subtree_to_replace: the treebank node for the given phrase text
     """
 
     def __init__(self, subtree_to_replace):
@@ -153,5 +169,3 @@ class PhraseStructureReplacementCollector(TreebankNodeVisitor):
 
     def _set_interpretations_for_subtree(self, subtree, interpretations):
         self.subtree_interpretations_map[id(subtree)] = interpretations
-
-

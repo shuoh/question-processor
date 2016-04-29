@@ -1,14 +1,26 @@
 import os
 from qclassifier.question_classifier import QuestionTypeClassifier
 
-classifier = QuestionTypeClassifier()
+classifier = QuestionTypeClassifier(debug=True)
 
-with open(os.path.join(os.path.dirname(__file__), 'data/questions.txt'), 'r') as question_file:
-    for line in question_file.readlines():
-        if line.isspace() or line.startswith('#'):
-            continue
+metrics = {}
+# classifier.classify('how can I get my order expedited?')
+classifier.classify('my phone is not working', metrics)
 
-        question_text = line.strip()
-        result = classifier.classify(question_text)
-        print question_text
-        print result
+print
+print '**********************:'
+print '*     PERFORMANCE    *'
+print '**********************'
+print metrics
+
+# with open(os.path.join(os.path.dirname(__file__), 'data/questions.txt'), 'r') as question_file:
+#     for line in question_file.readlines():
+#         if line.isspace() or line.startswith('#'):
+#             continue
+#
+#         question_text = line.strip()
+#         print question_text
+#         result = classifier.classify(question_text)
+#         print result
+#
+#         break

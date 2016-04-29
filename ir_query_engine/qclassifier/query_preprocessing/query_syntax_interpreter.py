@@ -1,8 +1,8 @@
 import re
 import itertools
 import time
-from qclassifier.utils.tree_traverser import TreebankNodeVisitor, dfs_traverse_tree
-from qclassifier.utils.sentence_parser import PARSER
+from ir_query_engine.qclassifier.utils.tree_traverser import TreebankNodeVisitor, dfs_traverse_tree
+from ir_query_engine.qclassifier.utils.sentence_parser import PARSER
 
 
 class QuerySyntaxInterpreter(object):

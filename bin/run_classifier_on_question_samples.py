@@ -1,5 +1,5 @@
 import os
-from qclassifier.question_classifier import QuestionTypeClassifier
+from ir_query_engine.qclassifier.question_classifier import QuestionTypeClassifier
 
 classifier = QuestionTypeClassifier(debug=True)
 

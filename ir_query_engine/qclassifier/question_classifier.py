@@ -1,4 +1,4 @@
-from qclassifier.query_preprocessing.query_syntax_interpreter import *
+from ir_query_engine.qclassifier.query_preprocessing.query_syntax_interpreter import *
 
 
 class QuestionTypeClassifier(object):

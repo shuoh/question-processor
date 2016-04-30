@@ -63,7 +63,8 @@ class QuerySyntaxInterpreter(object):
 class QuerySyntaxInterpretation(object):
     """
     Attributes:
-        phrase_struct_replacements: all the phrase structure replacements that this interpretation is based upon
+        phrase_struct_replacements: all the phrase structure replacements that this interpretation is based upon,
+                                    ordered by the position of their appeareance in the original query
         interpreted_query: only available after apply_to is called
         interpreted_query_tokens: only available after apply_to is called
     """

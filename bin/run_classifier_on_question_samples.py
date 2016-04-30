@@ -3,8 +3,10 @@ from ir_query_engine.qclassifier.question_classifier import QuestionTypeClassifi
 
 classifier = QuestionTypeClassifier(debug=True)
 metrics = {}
+classifier.classify('My phone is not working', metrics)
+
 # classifier.classify('can I get my order expedited?', metrics)
-classifier.classify("I don't have the middle support of my bed", metrics)
+# classifier.classify("I don't have the middle support of my bed", metrics)
 
 print
 print '**********************:'

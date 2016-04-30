@@ -1,0 +1,14 @@
+# need reward over positive match
+
+Do you ship internationally?
+Can I get my order expedited?
+What if I need to change my order?
+How do I know if an item is in stock?
+Do you have a delivery service?
+Can you pay for an item online and collect in store?
+Does IKEA offer assembly service?
+What happens if there is an issue with my Assembly?
+
+# these needs further investigation as to why the expected template is not the top match
+Is there an IKEA store near me?
+What should I do?

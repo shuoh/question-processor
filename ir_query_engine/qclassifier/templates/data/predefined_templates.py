@@ -25,6 +25,7 @@ PREDEFINED_TEMPLATES = [
     QuestionTemplate('how long (does|will) [NP] take'),
     QuestionTemplate('how long do I need to wait for [NP]'),
     QuestionTemplate('when (can|do|will) I (get|expect) [NP]'),
+    QuestionTemplate('when (can|do|will) I (get|expect) [NP] [ADJP|PP|VP]'),
     QuestionTemplate('when is [NP] (ready|available)'),
     QuestionTemplate('when will [NP] be (ready|available)'),
     QuestionTemplate('how long does it take to [VP]'),

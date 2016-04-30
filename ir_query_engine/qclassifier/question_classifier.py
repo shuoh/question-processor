@@ -2,7 +2,7 @@ from ir_query_engine.qclassifier.query_preprocessing.query_syntax_interpreter im
 from ir_query_engine.qclassifier.templates.template_matcher import TemplateMatcher
 from ir_query_engine.qclassifier.templates.data.predefined_templates import PREDEFINED_TEMPLATES
 
-NUM_TOP_CANDIDATES = 5
+NUM_TOP_CANDIDATES = 10
 
 
 class QuestionTypeClassifier(object):
@@ -31,7 +31,7 @@ class QuestionTypeClassifier(object):
 
         # TODO: extract entity data
 
-        return None
+        return top_matches
 
     def _debug_print(self, output):
         if self._debug:

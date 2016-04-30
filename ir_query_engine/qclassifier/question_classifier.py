@@ -27,7 +27,7 @@ class QuestionTypeClassifier(object):
         syntax_interpretations = self._syntax_interpreter.generate_all_interpretation(question, metrics)
 
         # find best matched templates
-        top_matches = self._template_matcher.get_best_N_matches(syntax_interpretations, NUM_TOP_CANDIDATES, metrics)
+        top_matches = self._template_matcher.get_best_n_matches(syntax_interpretations, NUM_TOP_CANDIDATES, metrics)
 
         # TODO: extract entity data
 

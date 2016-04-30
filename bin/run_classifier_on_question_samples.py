@@ -5,7 +5,7 @@ classifier = QuestionTypeClassifier(debug=True)
 
 metrics = {}
 # classifier.classify('how can I get my order expedited?')
-classifier.classify('my phone is not working, tell me what to do', metrics)
+classifier.classify('my phone is not working', metrics)
 
 print
 print '**********************:'
@@ -19,8 +19,7 @@ print metrics
 #             continue
 #
 #         question_text = line.strip()
-#         print question_text
-#         result = classifier.classify(question_text)
-#         print result
 #
-#         break
+#         print
+#         print '========================'
+#         result = classifier.classify(question_text)

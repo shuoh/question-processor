@@ -1,12 +1,14 @@
 import itertools
 import heapq
 import time
-from ir_query_engine.qclassifier.templates.question_templates import WordToken, PhraseStructureToken
+from ir_query_engine.qclassifier.templates.question_template import TemplateWordToken, TemplatePhraseStructureToken
+from ir_query_engine.qclassifier.query_preprocessing.query_tokens import QueryWordToken, QueryPhraseLabelToken, QueryPunctuationToken
 
-INSERT_QUERY_EXACT_WORD_PENALTY = 2
-INSERT_QUERY_PHRASE_PENALTY = 1
-INSERT_TEMPLATE_EXACT_WORD_PENALTY = 1
-INSERT_TEMPLATE_PHRASE_PENALTY = 0.5
+INSERT_EXACT_WORD_TO_QUERY_PENALTY = 2
+INSERT_PHRASE_TO_QUERY_PENALTY = 2
+INSERT_EXACT_WORD_TO_TEMPLATE_PENALTY = 0.5
+INSERT_PHRASE_TO_TEMPLATE_PENALTY = 1
+INSERT_PUNCTUATION_TO_TEMPLATE_PENALTY = 0
 
 
 class TemplateMatcher(object):
@@ -18,7 +20,7 @@ class TemplateMatcher(object):
         self._templates = templates
         self._debug = debug
 
-    def get_best_N_matches(self, query_interps, num_matches, metrics=None):
+    def get_best_n_matches(self, query_interps, num_matches, metrics=None):
         """
         Find the top N matches from all the templates by comparing the edit distance with the given query
         :param query_interps: all the possible interpretations of the input query,
@@ -67,19 +69,21 @@ class TemplateMatcher(object):
 
         for i in range(1, dp_matrix_h):
             template_token = template_tokens[i - 1]
-            if isinstance(template_token, WordToken):
-                dp_matrix[i][0] = dp_matrix[i - 1][0] + INSERT_QUERY_EXACT_WORD_PENALTY
-            elif isinstance(template_token, PhraseStructureToken):
-                dp_matrix[i][0] = dp_matrix[i - 1][0] + INSERT_QUERY_PHRASE_PENALTY
+            if isinstance(template_token, TemplateWordToken):
+                dp_matrix[i][0] = dp_matrix[i - 1][0] + INSERT_EXACT_WORD_TO_QUERY_PENALTY
+            elif isinstance(template_token, TemplatePhraseStructureToken):
+                dp_matrix[i][0] = dp_matrix[i - 1][0] + INSERT_PHRASE_TO_QUERY_PENALTY
             else:
                 raise Exception('Unexpected token type')
 
         for j in range(1, dp_matrix_w):
             query_token = query_tokens[j - 1]
-            if isinstance(query_token, WordToken):
-                dp_matrix[0][j] = dp_matrix[0][j - 1] + INSERT_TEMPLATE_EXACT_WORD_PENALTY
-            elif isinstance(query_token, PhraseStructureToken):
-                dp_matrix[0][j] = dp_matrix[0][j - 1] + INSERT_TEMPLATE_PHRASE_PENALTY
+            if isinstance(query_token, QueryWordToken):
+                dp_matrix[0][j] = dp_matrix[0][j - 1] + INSERT_EXACT_WORD_TO_TEMPLATE_PENALTY
+            elif isinstance(query_token, QueryPhraseLabelToken):
+                dp_matrix[0][j] = dp_matrix[0][j - 1] + INSERT_PHRASE_TO_TEMPLATE_PENALTY
+            elif isinstance(query_token, QueryPunctuationToken):
+                dp_matrix[0][j] = dp_matrix[0][j - 1] + INSERT_PUNCTUATION_TO_TEMPLATE_PENALTY
             else:
                 raise Exception('Unexpected token type')
 
@@ -89,21 +93,23 @@ class TemplateMatcher(object):
             template_token = template_tokens[i - 1]
             query_token = query_tokens[j - 1]
 
-            if template_token == query_token:
+            if template_token.match(query_token):
                 dp_matrix[i][j] = dp_matrix[i - 1][j - 1]
 
             else:
                 # if choose to edit the query to match the template
-                if isinstance(template_token, WordToken):
-                    insert_query = dp_matrix[i - 1][j] + INSERT_QUERY_EXACT_WORD_PENALTY
+                if isinstance(template_token, TemplateWordToken):
+                    insert_query = dp_matrix[i - 1][j] + INSERT_EXACT_WORD_TO_QUERY_PENALTY
                 else:
-                    insert_query = dp_matrix[i - 1][j] + INSERT_QUERY_PHRASE_PENALTY
+                    insert_query = dp_matrix[i - 1][j] + INSERT_PHRASE_TO_QUERY_PENALTY
 
                 # or if choose to edit the template to match the query
-                if isinstance(query_token, WordToken):
-                    insert_template = dp_matrix[i][j - 1] + INSERT_TEMPLATE_EXACT_WORD_PENALTY
+                if isinstance(query_token, QueryWordToken):
+                    insert_template = dp_matrix[i][j - 1] + INSERT_EXACT_WORD_TO_TEMPLATE_PENALTY
+                elif isinstance(query_token, QueryPhraseLabelToken):
+                    insert_template = dp_matrix[i][j - 1] + INSERT_PHRASE_TO_TEMPLATE_PENALTY
                 else:
-                    insert_template = dp_matrix[i][j - 1] + INSERT_TEMPLATE_PHRASE_PENALTY
+                    insert_template = dp_matrix[i][j - 1] + INSERT_PUNCTUATION_TO_TEMPLATE_PENALTY
 
                 dp_matrix[i][j] = min(insert_query, insert_template)
 

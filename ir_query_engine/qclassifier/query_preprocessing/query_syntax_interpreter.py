@@ -3,12 +3,18 @@ import itertools
 import time
 from ir_query_engine.qclassifier.utils.tree_traverser import TreebankNodeVisitor, dfs_traverse_tree
 from ir_query_engine.qclassifier.utils.sentence_parser import PARSER
-from ir_query_engine.qclassifier.templates.question_templates import tokenize_templated_string
+from ir_query_engine.qclassifier.query_preprocessing.query_tokens import tokenize_interpreted_query
 
 
 class QuerySyntaxInterpreter(object):
 
-    def __init__(self, replaceable_phrase_labels={'NP', 'VP'}, debug=False):
+    def __init__(self, replaceable_phrase_labels={'NP', 'VP', 'ADJP', 'PP'}, debug=False):
+        """
+        :param replaceable_phrase_labels: by default includes noun-phrase, verb-phrase, adjective-phrase,
+                                        prepositional-phrase
+        :param debug: True to enable debug output
+        :return:
+        """
         self._replaceable_phrase_labels = replaceable_phrase_labels
         self._debug = debug
 
@@ -83,7 +89,7 @@ class QuerySyntaxInterpretation(object):
             replaced = replacement.apply_to(replaced)
 
         self.interpreted_query = replaced
-        self.interpreted_query_tokens = tokenize_templated_string(replaced)
+        self.interpreted_query_tokens = tokenize_interpreted_query(replaced)
 
     @staticmethod
     def product(interp_list0, interp_list1):

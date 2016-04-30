@@ -10,6 +10,8 @@ class SentenceParser(object):
 
     def parse(self, text):
         """
+        NOTE: since the Stanford tagger and parser libraries are case-sensitive, the casing of the output of this
+              method is preserved. Caller must remember to normalize the casing when conducting comparison
         :param text: text to be parsed
         :return: dict including the following entries
         {
@@ -25,8 +27,12 @@ class SentenceParser(object):
             raise Exception('Multi-sentence query is not supported')
 
         word_tokens = word_tokenize(sentences[0])
-        normalized_sentence = ' '.join(word_tokens)
         pos_tags = self._stanford_pos_tagger.tag(word_tokens)
+
+        # TODO: http://stackoverflow.com/questions/19790188/expanding-english-language-contractions-in-python
+        # word_tokens, pos_tags = self._recover_contractions(word_tokens, pos_tags)
+
+        normalized_sentence = ' '.join(word_tokens)
         parsed_tree_list = list(self._stanford_parser.tagged_parse(pos_tags))
 
         return {
@@ -35,6 +41,10 @@ class SentenceParser(object):
             'pos_tags': pos_tags,
             'parsed_tree': parsed_tree_list[0],
         }
+
+    @staticmethod
+    def _recover_contractions(word_tokens, pos_tags):
+        pass
 
 
 PARSER = SentenceParser()

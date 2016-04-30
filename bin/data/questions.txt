@@ -23,7 +23,8 @@ How do I return my order?
 Can I place an order online and pick it up at my local IKEA store?
 How do I know if an item is in stock?
 Do you have a delivery service?
-When are you open? Are you open on holidays?
+When are you open?
+Are you open on holidays?
 What if a part is missing in the package?
 What is the IKEA Return Policy?
 What if my item does not meet the return policy?
@@ -36,11 +37,14 @@ Do IKEA stores they offer activities for children?
 Are Wheelchairs available to customers?
 Do you have a delivery service?
 How do I contact the carrier who will deliver to me?
-An item is missing or damaged during my delivery. What should I do?
+An item is missing or damaged during my delivery.
+What should I do?
 Does IKEA offer assembly service?
 What happens if there is an issue with my Assembly?
 What if a part is missing in the package?
 If screws are missing in the package, can you send them to me?
-The assembly instructions are missing from the package. Where can I find it?
-I don't have the middle support of my bed. Was it missing from the package?
+The assembly instructions are missing from the package.
+Where can I find it?
+I don't have the middle support of my bed.
+Was it missing from the package?
 Where can I find IKEA Warranties?

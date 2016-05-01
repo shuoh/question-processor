@@ -35,7 +35,7 @@ class TemplateMatcher(object):
         self._debug_print('Finding top %d matches from the %d templates...' % (num_matches, len(self._templates)))
 
         # start timer
-        start_time = time.clock()
+        start_time = time.time()
 
         results = []
         for interp, template in itertools.product(query_interps, self._templates):
@@ -51,7 +51,7 @@ class TemplateMatcher(object):
 
         # calculate time spent
         if metrics is not None:
-            elapse = time.clock() - start_time
+            elapse = time.time() - start_time
             metrics[self.__class__.__name__] = elapse
 
         return top_matches

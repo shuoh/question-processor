@@ -1,9 +1,10 @@
 import os
+import time
 from ir_query_engine.qclassifier.question_classifier import QuestionTypeClassifier
 
 classifier = QuestionTypeClassifier(debug=True)
 metrics = {}
-classifier.classify('My phone is not working', metrics)
+classifier.classify("What is your name that is different from his name?", metrics)
 
 # classifier.classify('can I get my order expedited?', metrics)
 # classifier.classify("I don't have the middle support of my bed", metrics)
@@ -25,6 +26,10 @@ print metrics
 #
 #         print
 #         print '========================'
-#         result = classifier.classify(question_text)
+#         metrics = {}
+#         start_time = time.time()
+#         result = classifier.classify(question_text, metrics)
 #         print 'Input: ' + question_text
-#         print 'Best match: %s  <-->  %s, score: %.1f' % (result[0][0].interpreted_query, result[0][1], result[0][2])
+#         print 'Best match: %s' % result[0]
+#         print 'Time spent: %f' % (time.time() - start_time)
+#         print 'Performance: %s' % metrics

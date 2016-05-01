@@ -1,50 +1,82 @@
-from nltk import word_tokenize, sent_tokenize
-from nltk.parse.stanford import StanfordParser
-from nltk.tag.stanford import StanfordPOSTagger
+from simplejson import loads
+from nltk.tree import Tree
+from ir_query_engine.qclassifier.utils import jsonrpc
+
+CORENLP_SERVER_HOST = 'ec2-52-38-116-30.us-west-2.compute.amazonaws.com'
+CORENLP_SERVER_PORT = 8080
 
 
 class SentenceParser(object):
-
-    _stanford_pos_tagger = StanfordPOSTagger('english-bidirectional-distsim.tagger')
-    _stanford_parser = StanfordParser(model_path="edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz")
+    """
+    The performance of the NLTK wrapper for Stanford CoreNLP is unacceptable.
+    This implementation is based on sending parsing request to a standalone server that runs CoreNLP Java library
+    For more information, checkout https://github.com/dasmith/stanford-corenlp-python
+    """
 
     def parse(self, text):
         """
         NOTE: since the Stanford tagger and parser libraries are case-sensitive, the casing of the output of this
               method is preserved. Caller must remember to normalize the casing when conducting comparison
         :param text: text to be parsed
-        :return: dict including the following entries
-        {
-            'word_tokens': list(str),
-            'normalized_sentence': str,
-            'pos_tags': list(tuple(str, str)),
-            'parsed_tree': Tree
+        :return: a SentenceParseResult object
         }
         """
-        text = text.lower()
-        sentences = sent_tokenize(text)
-        if len(sentences) > 1:
+        server = jsonrpc.ServerProxy(jsonrpc.JsonRpc20(),
+                                     jsonrpc.TransportTcpIp(addr=(CORENLP_SERVER_HOST, CORENLP_SERVER_PORT)))
+
+        parsed_sentences = loads(server.parse(text))['sentences']
+        if len(parsed_sentences) > 1:
             raise Exception('Multi-sentence query is not supported')
+        parsed_sentence = parsed_sentences[0]
 
-        word_tokens = word_tokenize(sentences[0])
-        pos_tags = self._stanford_pos_tagger.tag(word_tokens)
+        word_tokens = [ParsedWordToken(word_wire_format) for word_wire_format in parsed_sentence['words']]
+        # word_tokens = self._recover_contractions(word_tokens)
 
-        # TODO: http://stackoverflow.com/questions/19790188/expanding-english-language-contractions-in-python
-        # word_tokens, pos_tags = self._recover_contractions(word_tokens, pos_tags)
+        normalized_sentence = ' '.join([word_token.text for word_token in word_tokens])
 
-        normalized_sentence = ' '.join(word_tokens)
-        parsed_tree_list = list(self._stanford_parser.tagged_parse(pos_tags))
+        parsed_tree = Tree.fromstring(parsed_sentence['parsetree'])
 
-        return {
-            'word_tokens': word_tokens,
-            'normalized_sentence': normalized_sentence,
-            'pos_tags': pos_tags,
-            'parsed_tree': parsed_tree_list[0],
-        }
+        return SentenceParseResult(word_tokens = word_tokens,
+                                   normalized_sentence=normalized_sentence,
+                                   parsed_tree=parsed_tree,
+                                   token_dependency=None)
 
     @staticmethod
-    def _recover_contractions(word_tokens, pos_tags):
-        pass
+    def _recover_contractions(word_tokens):
+        # TODO: http://stackoverflow.com/questions/19790188/expanding-english-language-contractions-in-python
+        return word_tokens
+
+
+class SentenceParseResult(object):
+
+    def __init__(self, word_tokens, normalized_sentence, parsed_tree, token_dependency):
+        """
+        :param word_tokens: list(ParsedWordToken)
+        :param normalized_sentence: str
+        :param parsed_tree: nltk.Tree
+        :param token_dependency: list((dependent_index, head_index, dep_type))
+        """
+        self.word_tokens = word_tokens
+        self.normalized_sentence = normalized_sentence
+        self.parsed_tree = parsed_tree
+        self.token_dependency = token_dependency
+
+
+class ParsedWordToken(object):
+
+    def __init__(self, core_nlp_result):
+        """
+        [u'What',
+             {u'CharacterOffsetBegin': u'0',
+              u'CharacterOffsetEnd': u'4',
+              u'Lemma': u'what',
+              u'NamedEntityTag': u'O',
+              u'PartOfSpeech': u'WP'}]
+        """
+        self.text = core_nlp_result[0]
+        self.lemma = core_nlp_result[1]['Lemma']
+        self.pos = core_nlp_result[1]['PartOfSpeech']
 
 
 PARSER = SentenceParser()
+

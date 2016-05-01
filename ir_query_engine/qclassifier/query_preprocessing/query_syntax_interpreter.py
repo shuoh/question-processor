@@ -28,11 +28,11 @@ class QuerySyntaxInterpreter(object):
         self._debug_print('Generating possible interpretations of the query...')
 
         # start timer
-        start_time = time.clock()
+        start_time = time.time()
 
         parse_result = PARSER.parse(sentence)
-        normalized_sentence = parse_result['normalized_sentence']
-        parsed_tree = parse_result['parsed_tree']
+        normalized_sentence = parse_result.normalized_sentence
+        parsed_tree = parse_result.parsed_tree
 
         self._debug_print('Normalized form: ' + normalized_sentence)
 
@@ -50,7 +50,7 @@ class QuerySyntaxInterpreter(object):
 
         # calculate time spent
         if metrics is not None:
-            elapse = time.clock() - start_time
+            elapse = time.time() - start_time
             metrics[self.__class__.__name__] = elapse
 
         return interpretations

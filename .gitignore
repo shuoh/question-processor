@@ -65,6 +65,3 @@ virtenv
 
 # pycharm
 .idea
-
-# stanford nltk libraries are too big to be pushed to GitHut
-lib/stanford-*

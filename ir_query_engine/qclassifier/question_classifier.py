@@ -5,15 +5,18 @@ from ir_query_engine.qclassifier.templates.data.predefined_templates import PRED
 from ir_query_engine.qclassifier.query_concept_extraction.phrase_token_concept_extractor import \
     PhraseTokenConceptExtractor
 
-NUM_TOP_CANDIDATES = 5
-
 
 class QuestionClassifier(object):
     """
     The entry point for classifying an incoming question and converting it into knowledge base query language
     """
 
-    def __init__(self, debug=False):
+    def __init__(self, num_top_match=5, debug=False):
+        """
+        :param num_top_match: number of top matches to be returned
+        :param debug: True to enable debug output
+        """
+        self._num_top_match = num_top_match
         self._debug = debug
 
         # initialize each sub components
@@ -38,7 +41,7 @@ class QuestionClassifier(object):
         syntax_interpretations = self._syntax_interpreter.generate_all_interpretation(parse_result, metrics)
 
         # find best matched templates
-        top_matches = self._template_matcher.get_best_n_matches(syntax_interpretations, NUM_TOP_CANDIDATES, metrics)
+        top_matches = self._template_matcher.get_best_n_matches(syntax_interpretations, self._num_top_match, metrics)
 
         results = []
         for match in top_matches:

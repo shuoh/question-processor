@@ -1,10 +1,10 @@
 import os
 import time
-from ir_query_engine.qclassifier.question_classifier import QuestionTypeClassifier
+from ir_query_engine.qclassifier.question_classifier import QuestionClassifier
 
-classifier = QuestionTypeClassifier(debug=True)
+classifier = QuestionClassifier(debug=True)
 metrics = {}
-classifier.classify("What is your name that is different from his name?", metrics)
+classifier.classify("what is the name of my sister?", metrics)
 
 # classifier.classify('can I get my order expedited?', metrics)
 # classifier.classify("I don't have the middle support of my bed", metrics)
@@ -15,7 +15,7 @@ print '*     PERFORMANCE    *'
 print '**********************'
 print metrics
 
-# classifier = QuestionTypeClassifier(debug=False)
+# classifier = QuestionClassifier(debug=False)
 #
 # with open(os.path.join(os.path.dirname(__file__), 'data/all_questions.txt'), 'r') as question_file:
 #     for line in question_file.readlines():

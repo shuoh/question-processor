@@ -36,10 +36,12 @@ class SentenceParser(object):
 
         parsed_tree = Tree.fromstring(parsed_sentence['parsetree'])
 
-        return SentenceParseResult(word_tokens = word_tokens,
+        token_dependency = parsed_sentence['dependencies']
+
+        return SentenceParseResult(word_tokens=word_tokens,
                                    normalized_sentence=normalized_sentence,
                                    parsed_tree=parsed_tree,
-                                   token_dependency=None)
+                                   token_dependency=token_dependency)
 
     @staticmethod
     def _recover_contractions(word_tokens):
@@ -54,7 +56,7 @@ class SentenceParseResult(object):
         :param word_tokens: list(ParsedWordToken)
         :param normalized_sentence: str
         :param parsed_tree: nltk.Tree
-        :param token_dependency: list((dependent_index, head_index, dep_type))
+        :param token_dependency: list((dep_type, head_token, dependent_token))
         """
         self.word_tokens = word_tokens
         self.normalized_sentence = normalized_sentence
@@ -76,7 +78,3 @@ class ParsedWordToken(object):
         self.text = core_nlp_result[0]
         self.lemma = core_nlp_result[1]['Lemma']
         self.pos = core_nlp_result[1]['PartOfSpeech']
-
-
-PARSER = SentenceParser()
-

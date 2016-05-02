@@ -1,7 +1,0 @@
-
-
-
-class HeadWordFinder(object):
-    pass
-
-

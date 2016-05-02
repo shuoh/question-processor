@@ -19,6 +19,12 @@ class QuestionTemplate(object):
     def __repr__(self):
         return self.template_str
 
+    def to_knowledge_base_query(self, extracted_concepts):
+        """
+        :param extracted_concepts: a list of PhraseTokenConcept objects
+        """
+        return None
+
     @staticmethod
     def _check_valid_template(template_str):
         if not re.match('^'+VALID_TEMPLATE_REGEX+'$', template_str):

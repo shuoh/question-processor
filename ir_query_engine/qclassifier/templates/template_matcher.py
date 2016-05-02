@@ -29,7 +29,7 @@ class TemplateMatcher(object):
                             represented by a list of QuerySyntaxInterpretation object
         :param num_matches: number of top matches
         :param metrics: metrics dict where the perf data will be collected
-        :return: list((QuerySyntaxInterpretation, QuestionTemplate, match_score, phrase_match_mapping))
+        :return: list(TemplateMatchResult)
         """
 
         self._debug_print('Finding top %d matches from the %d templates...' % (num_matches, len(self._templates)))

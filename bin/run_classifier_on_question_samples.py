@@ -31,7 +31,6 @@ with open(os.path.join(os.path.dirname(__file__), 'data/all_questions.txt'), 'r'
         result = classifier.classify(question_text, metrics)
         print 'Input: ' + question_text
         print 'Best match: %s' % result[0].template_match_result
-        for i, concept in enumerate(result[0].kb_query):
-            print '%d --> %s' % (i, concept)
+        print 'KB query: %s' % result[0].kb_query
         print 'Time spent: %f' % (time.time() - start_time)
         print 'Performance: %s' % metrics

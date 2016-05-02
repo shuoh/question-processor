@@ -97,7 +97,7 @@ class PhraseTokenConceptExtractor(object):
 
         concept = VerbPhraseTokenConcept(action=action_token.lemma,
                                          action_modifiers=action_modifiers,
-                                         object=object_token.lemma if object_token else None,
+                                         object_=object_token.lemma if object_token else None,
                                          object_modifiers=object_modifiers)
         # print '%s --> %s' % (' '.join(phrase_parse_tree.leaves()), concept)
         return concept
@@ -141,7 +141,9 @@ class PhraseTokenConceptExtractor(object):
 
 
 class PhraseTokenConcept(object):
-    pass
+
+    def to_simple_text(self):
+        raise NotImplementedError()
 
 
 class NounPhraseTokenConcept(PhraseTokenConcept):
@@ -162,24 +164,30 @@ class NounPhraseTokenConcept(PhraseTokenConcept):
         return 'Entity: %s(%s), Attribute: %s(%s)' \
                % (self.entity, self.entity_modifiers, self.attribute, self.attribute_modifiers)
 
+    def to_simple_text(self):
+        return self.entity
+
 
 class VerbPhraseTokenConcept(PhraseTokenConcept):
 
-    def __init__(self, action, action_modifiers, object, object_modifiers):
+    def __init__(self, action, action_modifiers, object_, object_modifiers):
         """
         :param action: str
         :param action_modifiers: list((str, str))
-        :param object: str
+        :param object_: str
         :param object_modifiers: list((str, str))
         """
         self.action = action
         self.action_modifiers = action_modifiers
-        self.object = object
+        self.object = object_
         self.object_modifiers = object_modifiers
 
     def __repr__(self):
         return 'Action: %s(%s), Object: %s(%s)' \
                % (self.action, self.action_modifiers, self.object, self.object_modifiers)
+
+    def to_simple_text(self):
+        return self.action
 
 
 class AdjectivePhraseTokenConcept(PhraseTokenConcept):
@@ -191,6 +199,9 @@ class AdjectivePhraseTokenConcept(PhraseTokenConcept):
     def __repr__(self):
         return 'Adjective: %s(%s)' % (self.adjective, self.adjective_modifiers)
 
+    def to_simple_text(self):
+        return self.adjective
+
 
 class PrepositionalPhraseTokenConcept(PhraseTokenConcept):
 
@@ -198,4 +209,7 @@ class PrepositionalPhraseTokenConcept(PhraseTokenConcept):
         self.phrase = phrase
 
     def __repr__(self):
+        return self.phrase
+
+    def to_simple_text(self):
         return self.phrase

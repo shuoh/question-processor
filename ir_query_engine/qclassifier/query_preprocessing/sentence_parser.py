@@ -36,12 +36,12 @@ class SentenceParser(object):
 
         parsed_tree = Tree.fromstring(parsed_sentence['parsetree'])
 
-        token_dependency = parsed_sentence['dependencies']
+        word_dependency = SentenceWordDependency(parsed_sentence['dependencies'])
 
         return SentenceParseResult(word_tokens=word_tokens,
                                    normalized_sentence=normalized_sentence,
                                    parsed_tree=parsed_tree,
-                                   token_dependency=token_dependency)
+                                   word_dependency=word_dependency)
 
     @staticmethod
     def _recover_contractions(word_tokens):
@@ -51,17 +51,17 @@ class SentenceParser(object):
 
 class SentenceParseResult(object):
 
-    def __init__(self, word_tokens, normalized_sentence, parsed_tree, token_dependency):
+    def __init__(self, word_tokens, normalized_sentence, parsed_tree, word_dependency):
         """
         :param word_tokens: list(ParsedWordToken)
         :param normalized_sentence: str
         :param parsed_tree: nltk.Tree
-        :param token_dependency: list((dep_type, head_token, dependent_token))
+        :param word_dependency: SentenceWordDependency
         """
         self.word_tokens = word_tokens
         self.normalized_sentence = normalized_sentence
         self.parsed_tree = parsed_tree
-        self.token_dependency = token_dependency
+        self.word_dependency = word_dependency
 
 
 class ParsedWordToken(object):
@@ -78,3 +78,54 @@ class ParsedWordToken(object):
         self.text = core_nlp_result[0]
         self.lemma = core_nlp_result[1]['Lemma']
         self.pos = core_nlp_result[1]['PartOfSpeech']
+
+
+class SentenceWordDependency(object):
+
+    def __init__(self, core_nlp_result):
+        """
+        [[u'root', u'ROOT', u'take'],
+         [u'advmod', u'long', u'How'],
+         [u'dep', u'take', u'long'],
+         [u'aux', u'take', u'does'],
+         [u'nsubj', u'take', u'shipping']]
+        """
+        self._head_word_lookup_dict = self._construct_head_word_lookup_dict(core_nlp_result)
+
+    @staticmethod
+    def _construct_head_word_lookup_dict(core_nlp_result):
+        lookup_dict = {}
+        for triple in core_nlp_result:
+            # ignore root dependency
+            if triple[0] == 'root':
+                continue
+            # ignore self relation
+            if triple[1] == triple[2]:
+                continue
+            head_word = triple[1]
+            if head_word not in lookup_dict:
+                lookup_dict[head_word] = []
+            lookup_dict[head_word].append(triple)
+        return lookup_dict
+
+    def lookup_dependencies_on(self, head, dependent=None, transitive=False):
+        """
+        :param head: the head (governor) of the relation
+        :param dependent: the dependent (optional)
+        :param transitive: True if transitive dependencies are also considered.
+                           This parameter is ignored if dependent is None
+        :return: a list of dependencies if there's any found, None otherwise
+        """
+        results = []
+        if head in self._head_word_lookup_dict:
+            direct_relations = self._head_word_lookup_dict[head]
+            if dependent:
+                results = [triple for triple in direct_relations if triple[2] == dependent]
+                if not results and transitive:
+                    for intermediate in direct_relations:
+                        if self.lookup_dependencies_on(intermediate[2], dependent, True):
+                            return [(None, head, dependent)]
+            else:
+                results = direct_relations
+
+        return results if results else None

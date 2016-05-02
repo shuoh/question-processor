@@ -96,9 +96,9 @@ class QuerySyntaxInterpretation(object):
 
         self.interpreted_query = replaced
         self.interpreted_query_tokens = tokenize_interpreted_query(replaced)
-        self.phrase_token_offsets = self._caculate_phrase_token_offsets(self.interpreted_query_tokens)
+        self.phrase_token_offsets = self._calculate_phrase_token_offsets(self.interpreted_query_tokens)
 
-    def _caculate_phrase_token_offsets(self, interpreted_tokens):
+    def _calculate_phrase_token_offsets(self, interpreted_tokens):
         offsets = [-1 for _ in self.phrase_struct_replacements]
         replacement_idx = 0
         uninterpreted_token_idx = 0

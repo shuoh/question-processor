@@ -108,13 +108,16 @@ class SentenceWordDependency(object):
             lookup_dict[head_word].append(triple)
         return lookup_dict
 
+    def __repr__(self):
+        return str(self._head_word_lookup_dict)
+
     def lookup_dependencies_on(self, head, dependent=None, transitive=False):
         """
         :param head: the head (governor) of the relation
         :param dependent: the dependent (optional)
         :param transitive: True if transitive dependencies are also considered.
                            This parameter is ignored if dependent is None
-        :return: a list of dependencies if there's any found, None otherwise
+        :return: a list of dependencies if there's any found, empty list otherwise
         """
         results = []
         if head in self._head_word_lookup_dict:
@@ -128,4 +131,4 @@ class SentenceWordDependency(object):
             else:
                 results = direct_relations
 
-        return results if results else None
+        return results

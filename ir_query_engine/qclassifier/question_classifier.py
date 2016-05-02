@@ -5,7 +5,7 @@ from ir_query_engine.qclassifier.templates.data.predefined_templates import PRED
 from ir_query_engine.qclassifier.query_concept_extraction.phrase_token_concept_extractor import \
     PhraseTokenConceptExtractor
 
-NUM_TOP_CANDIDATES = 10
+NUM_TOP_CANDIDATES = 5
 
 
 class QuestionClassifier(object):

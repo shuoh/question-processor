@@ -23,7 +23,8 @@ class QuestionTemplate(object):
         """
         :param extracted_concepts: a list of PhraseTokenConcept objects
         """
-        return None
+        # TODO
+        return extracted_concepts
 
     @staticmethod
     def _check_valid_template(template_str):

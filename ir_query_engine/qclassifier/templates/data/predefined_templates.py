@@ -55,5 +55,6 @@ PREDEFINED_TEMPLATES = [
     QuestionTemplate('why [NP] [VP]'),
     QuestionTemplate('how come [NP] [VP]'),
     QuestionTemplate('what if [NP] [VP]'),
+    QuestionTemplate('what if [NP] (is|are|was|were) [VP]'),
     QuestionTemplate('[NP] [VP]'),
 ]

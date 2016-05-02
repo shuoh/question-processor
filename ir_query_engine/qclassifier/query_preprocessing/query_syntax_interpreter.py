@@ -69,8 +69,8 @@ class QuerySyntaxInterpretation(object):
                                     ordered by the position of their appearance in the original query
         interpreted_query: str (only available after apply_to is called)
         interpreted_query_tokens: list(QueryToken), (only available after apply_to is called)
-        phrase_token_offsets: offset of each of the phrase tokens in the original tokenized query. list(int),
-                              (only available after apply_to is called)
+        token_offsets: offset of each of the interpreted tokens in the original tokenized query. list(int),
+                        (only available after apply_to is called)
     """
 
     def __init__(self, phrase_struct_replacements):
@@ -80,7 +80,7 @@ class QuerySyntaxInterpretation(object):
         self.phrase_struct_replacements = phrase_struct_replacements
         self.interpreted_query = None
         self.interpreted_query_tokens = None
-        self.phrase_token_offsets = None
+        self.token_offsets = None
 
     def __repr__(self):
         return str(self.phrase_struct_replacements)
@@ -96,22 +96,20 @@ class QuerySyntaxInterpretation(object):
 
         self.interpreted_query = replaced
         self.interpreted_query_tokens = tokenize_interpreted_query(replaced)
-        self.phrase_token_offsets = self._calculate_phrase_token_offsets(self.interpreted_query_tokens)
+        self.token_offsets = self._calculate_token_offsets(self.interpreted_query_tokens)
 
-    def _calculate_phrase_token_offsets(self, interpreted_tokens):
-        offsets = [-1 for _ in self.phrase_struct_replacements]
+    def _calculate_token_offsets(self, interpreted_tokens):
+        offsets = []
         replacement_idx = 0
         uninterpreted_token_idx = 0
         for token in interpreted_tokens:
+            offsets.append(uninterpreted_token_idx)
             if isinstance(token, QueryPhraseLabelToken):
-                offsets[replacement_idx] = uninterpreted_token_idx
                 phrase_replacement = self.phrase_struct_replacements[replacement_idx]
                 uninterpreted_token_idx += len(phrase_replacement.subtree_to_replace.leaves())
                 replacement_idx += 1
             else:
                 uninterpreted_token_idx += 1
-        if not replacement_idx == len(offsets):
-            raise Exception("Unexcepted condition - found some of the phrase token's offset is not found")
         return offsets
 
     @staticmethod

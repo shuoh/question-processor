@@ -158,9 +158,12 @@ class TemplateMatcher(object):
 class TemplateMatchResult(object):
     """
     Attributes:
-        template_phrase_token_to_query_parse_subtree_mapping: a list in the length same as the number of phrase tokens
-        in the template, with each element being the matched parsing subtree of the query if the corresponding phrase
-        token is matched in the query, None otherwise.
+        template_phrase_token_offsets_in_query_words: a list in the length same as the number of phrase tokens
+        in the template, with each element being the offset of the matched phrase in the original query, or -1 if the
+        phrase token is not matched in the original query.
+
+        template_phrase_token_matched_query_subtrees: a list in the length same as the number of phrase tokens
+        in the template, with each element being the matched subtree of the query parse tree, or None if not matched
     """
 
     def __init__(self, template, query_interpretation, match_score, phrase_match_mapping):
@@ -174,36 +177,48 @@ class TemplateMatchResult(object):
         self.template = template
         self.query_interpretation = query_interpretation
         self.match_score = match_score
-        self.phrase_match_mapping = phrase_match_mapping
 
-        self.template_phrase_token_to_query_parse_subtree_mapping = \
-            self._to_template_phrase_token_to_query_parse_subtree_mapping(phrase_match_mapping)
+        self.template_phrase_token_offsets_in_query_words, self.template_phrase_token_matched_query_subtrees = \
+            self._calculate_template_phrase_token_offset_in_query(phrase_match_mapping)
 
     def __repr__(self):
         return '%s, score: %.1f, matched_subtrees: %s' % (self.template, self.match_score,
-                                                          self.template_phrase_token_to_query_parse_subtree_mapping)
+                                                          self.template_phrase_token_matched_query_subtrees)
 
-    def _to_template_phrase_token_to_query_parse_subtree_mapping(self, phrase_match_mapping):
+    def _calculate_template_phrase_token_offset_in_query(self, phrase_match_mapping):
 
-        # first reconstruct mapping from query token index to query interpretation replacement index
-        replacement_cur_idx = -1
-        replacement_idxes = [-1 for i in range(len(self.query_interpretation.interpreted_query_tokens))]
-        for query_token_idx, query_token in enumerate(self.query_interpretation.interpreted_query_tokens):
+        # query: what is [NP] called
+        # assuming the [NP] phrase token in the above example stands for "LeBron James"
+        # then query_token_offsets = [0, 1, 2, 4]
+        query_token_offsets = self.query_interpretation.token_offsets
+
+        # construct query token to query phrase token mapping
+        # in the same case above, [-1, -1, 0, -1]
+        query_token_to_query_phrase_token_indexes = []
+        query_phrase_index = 0
+        for query_token in self.query_interpretation.interpreted_query_tokens:
             if isinstance(query_token, QueryPhraseLabelToken):
-                replacement_cur_idx += 1
-                replacement_idxes[query_token_idx] = replacement_cur_idx
+                query_token_to_query_phrase_token_indexes.append(query_phrase_index)
+                query_phrase_index += 1
+            else:
+                query_token_to_query_phrase_token_indexes.append(-1)
 
         # now we are ready to construct the desired mapping
-        matched_subtrees = []
+        template_token_offsets = []
+        template_token_matched_subtrees = []
         for template_token_idx, template_token in enumerate(self.template.template_tokenized):
             if isinstance(template_token, TemplatePhraseStructureToken):
                 if template_token_idx in phrase_match_mapping:
                     matched_query_token_idx = phrase_match_mapping[template_token_idx]
-                    replacement_idx = replacement_idxes[matched_query_token_idx]
-                    replacement_data = self.query_interpretation.phrase_struct_replacements[replacement_idx]
-                    # the parsed subtree is inside the replacement unit that was applied to the phrase token
-                    matched_subtrees.append(replacement_data.subtree_to_replace)
-                else:
-                    matched_subtrees.append(None)
 
-        return matched_subtrees
+                    template_token_offsets.append(query_token_offsets[matched_query_token_idx])
+
+                    # the parsed subtree is inside the replacement unit that was applied to the phrase token
+                    replacement_idx = query_token_to_query_phrase_token_indexes[matched_query_token_idx]
+                    replacement_data = self.query_interpretation.phrase_struct_replacements[replacement_idx]
+                    template_token_matched_subtrees.append(replacement_data.subtree_to_replace)
+                else:
+                    template_token_offsets.append(-1)
+                    template_token_matched_subtrees.append(None)
+
+        return template_token_offsets, template_token_matched_subtrees

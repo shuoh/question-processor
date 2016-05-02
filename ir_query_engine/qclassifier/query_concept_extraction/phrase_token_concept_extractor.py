@@ -7,28 +7,33 @@ class PhraseTokenConceptExtractor(object):
     def __init__(self, debug=False):
         self._debug = debug
 
-    def extract_all_concepts(self, query_interpretation, whole_query_parse_result):
+    def extract_all_concepts(self, template_match_result, whole_query_parse_result):
 
         word_dependency = whole_query_parse_result.word_dependency
         word_tokens = whole_query_parse_result.word_tokens
 
         concepts = []
-        for phrase_token_idx, phrase_token_replacement in enumerate(query_interpretation.phrase_struct_replacements):
-            phrase_parse_tree = phrase_token_replacement.subtree_to_replace
-            phrase_offset = query_interpretation.phrase_token_offsets[phrase_token_idx]
+        for phrase_parse_tree, phrase_offset in zip(
+                template_match_result.template_phrase_token_matched_query_subtrees,
+                template_match_result.template_phrase_token_offsets_in_query_words):
+
+            if not phrase_parse_tree:
+                concepts.append(None)
+                continue
+
             phrase_size = len(phrase_parse_tree.leaves())
             phrase_word_tokens = word_tokens[phrase_offset:phrase_offset+phrase_size]
 
-            if phrase_token_replacement.phrase_label == 'NP':
+            if phrase_parse_tree.label() == 'NP':
                 extractor = self._extract_noun_phrase_concept
-            elif phrase_token_replacement.phrase_label == 'VP':
+            elif phrase_parse_tree.label() == 'VP':
                 extractor = self._extract_verb_phrase_concept
-            elif phrase_token_replacement.phrase_label == 'ADJP':
+            elif phrase_parse_tree.label() == 'ADJP':
                 extractor = self._extract_adjective_phrase_concept
-            elif phrase_token_replacement.phrase_label == 'PP':
+            elif phrase_parse_tree.label() == 'PP':
                 extractor = self._extract_prepositional_phrase_concept
             else:
-                raise Exception('Unknown phrase label: ' + phrase_token_replacement.phrase_label)
+                raise Exception('Unknown phrase label: ' + phrase_parse_tree.label())
 
             concepts.append(extractor(phrase_parse_tree, phrase_word_tokens, word_dependency))
 
@@ -112,7 +117,7 @@ class PhraseTokenConceptExtractor(object):
 
     def _extract_prepositional_phrase_concept(self, phrase_parse_tree, word_tokens, word_dependency):
         # TODO: extract head word of the noun
-        return PrepositionalPhraseTokenConcept(phrase=' '.join(phrase_parse_tree.leaves()))
+        return PrepositionalPhraseTokenConcept(phrase=' '.join([word_token.text for word_token in word_tokens]))
 
     @staticmethod
     def _find_word_token(word_text, word_tags):

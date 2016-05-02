@@ -43,10 +43,9 @@ class QuestionClassifier(object):
         results = []
         for match in top_matches:
             matched_template = match.template
-            query_interpretation = match.query_interpretation
 
             # extract concepts of all the phrase tokens in the interpretation
-            concepts = self._token_concept_extractor.extract_all_concepts(query_interpretation, parse_result)
+            concepts = self._token_concept_extractor.extract_all_concepts(match, parse_result)
             # generate kb query through the template
             kb_query = matched_template.to_knowledge_base_query(concepts)
 

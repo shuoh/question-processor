@@ -4,7 +4,7 @@ from ir_query_engine.qclassifier.question_classifier import QuestionClassifier
 
 classifier = QuestionClassifier(debug=True)
 metrics = {}
-classifier.classify("What if my items are damaged or incorrect?", metrics)
+classifier.classify("Do you offer 1-hour delivery to my address?", metrics)
 
 # classifier.classify('can I get my order expedited?', metrics)
 # classifier.classify("I don't have the middle support of my bed", metrics)

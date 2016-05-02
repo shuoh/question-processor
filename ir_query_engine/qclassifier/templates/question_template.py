@@ -11,10 +11,12 @@ VALID_TEMPLATE_REGEX = '(('+VALID_TOKEN_REGEX+') )*('+VALID_TOKEN_REGEX+')'
 
 class QuestionTemplate(object):
 
-    def __init__(self, template_str):
+    def __init__(self, template_str, concept_to_query_converter):
         self._check_valid_template(template_str)
         self.template_str = template_str
         self.template_tokenized = self._tokenize_template_string(template_str)
+
+        self.concept_to_query_converter = concept_to_query_converter
 
     def __repr__(self):
         return self.template_str
@@ -23,8 +25,7 @@ class QuestionTemplate(object):
         """
         :param extracted_concepts: a list of PhraseTokenConcept objects
         """
-        # TODO
-        return extracted_concepts
+        return self.concept_to_query_converter(*extracted_concepts)
 
     @staticmethod
     def _check_valid_template(template_str):
